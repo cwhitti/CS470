@@ -3,10 +3,10 @@ There’s nothing intrinsically different or magical about AI programming; it’
 
 I’m calling this “Fred Flintstone problem-solving” because it’s just that: we know nothing at this early point in the course, so we can offer only completely off-the-cuff, uninformed, “naive” solving of a problem. As we move forward, we’ll soon develop a broader understanding of the intellectual “terrain” surrounding problems like these: what we are really doing, what the alternative solution approaches in this terrain are, and how to think about what will work best. But for now, we’re just going to get out our caveman club and flail away… and then grunt happily when we get a solution!
 
-## The Problem:
+### The Problem:
 In this first small programming exercise, we will consider how we can solve Boggle. If you haven’t played in awhile, here’s the gist of the game: There are 16 cubes with letters on the faces. These cubes are randomly arranged in a 4x4 matrix by shaking the boggle game. The goal of the game is to make words out of these letters by traversing adjacent (horizontal, vertical or diagonal) tiles. This “chain” of letters may snake all over the board, but you can only use each tile once, i.e., no fair using the same letter twice in a word. In a fixed amount of time players must make as many words as possible. Words are then scored as follows: 1 point for each 3-4 letter word, 2 points for a 5-letter word, 3 points for a 6-letter word, 5 points for a 7-letter word, 11 points for a 8 (or more)-letter word.
 
-### The Assignment: Overview
+## The Assignment: Overview
 In this problem, you are asked to solve Boggle boards exhaustively in whatever way you can (go Fred Flintstone!): given a particular boggle board as input, your algorithm should enumerate all possible words that can be found in that Boggle board.
 
 The dictionary we will use for our game of Boggle is the Tournament Scrabble Wordlist which includes 178,691 words. I’ve cleaned up and provided a file of dictionary words for you here.
