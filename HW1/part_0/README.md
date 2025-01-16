@@ -27,15 +27,15 @@ The main point of this exercise is to just get everybody warmed back up on Pytho
 Ok, so it’s really pretty simple: you have to write a program that (a) starts in each of the possible starting points on the boggle board; and (b) explores all possible paths from that point, recording/scoring any correct words it finds along the way. Put this way, it’s simple: your key needs are a function that, given a current position, generates all possible adjacent positions (gotta stay on the board!). Then you have to consider that not all adjacent positions are possible: you have to subtract away any tiles that are already on the path you’ve already explored (can’t use a tile twice!). Then you put it together: start at some position, see if the letter it contains is a legal word (if so, score it), then generate all possible next positions to jump to from there, jump to each one (adding its letter to the path)…and then repeat until none of your paths can go any further. If your brain is thinking “massive recursion!” then you’re on the right track…
 
 ## Part 0 Deliverables
-You must use this board.txt Download board.txt and twl06.txt Download twl06.txt as your input files.
-A loadBoard(filename) function that takes the filename of a board file, and loads that in to work on — returns a new board data structure (NxN matrix). Obviously you’ll call this right at the start.
-A printBoard(board_object) function. Takes in a reference to a loaded board data structure (an NxN matrix) and prints it out. Simple.
-A possibleMoves(xy_pair, board_object) function. Takes in a current position (just an x-y pair) and a boggle board and generates all possible next positions (x-y pairs in a list, set, or whatever you decide).
-Download 02_test.py Download 02_test.py and put your implementations of the three functions at the top. Running it should give output like this: 02_test.txt Download 02_test.txt.
-Submit a single PDF file that includes prompt, input/output for each command, and a newline between commands.
+You must use this board.txt and twl06.txt as your input files.
+- A loadBoard(filename) function that takes the filename of a board file, and loads that in to work on — returns a new board data structure (NxN matrix). Obviously you’ll call this right at the start.
+- A printBoard(board_object) function. Takes in a reference to a loaded board data structure (an NxN matrix) and prints it out. Simple.
+- A possibleMoves(xy_pair, board_object) function. Takes in a current position (just an x-y pair) and a boggle board and generates all possible next positions (x-y pairs in a list, set, or whatever you decide).
+- Download 02_test.py and put your implementations of the three functions at the top. Running it should give output like this: 02_test.txt 
+- Submit a single PDF file that includes prompt, input/output for each command, and a newline between commands.
 
 ## FAQ
-What should I do if interpreter.py does not work? Please type “python” to start the REPL, then copy and paste the test code into the python interpreter so we can see the prompt, the input, and the output for each command.
-Can my functions use different inputs and/or return different outputs than shown in the test/example code? Your functions should take the same inputs/outputs as shown in the test/example code.
-For functions which accept mutable data structures like lists as arguments, should my function modify or copy? your choice as long as the output is correct.
-How should I organize the board data structure and indexing? You are free to organize your data structure / indexing as you like as long as the output is correct.
+- What should I do if interpreter.py does not work? Please type “python” to start the REPL, then copy and paste the test code into the python interpreter so we can see the prompt, the input, and the output for each command.
+- Can my functions use different inputs and/or return different outputs than shown in the test/example code? Your functions should take the same inputs/outputs as shown in the test/example code.
+- For functions which accept mutable data structures like lists as arguments, should my function modify or copy? your choice as long as the output is correct.
+- How should I organize the board data structure and indexing? You are free to organize your data structure / indexing as you like as long as the output is correct.
