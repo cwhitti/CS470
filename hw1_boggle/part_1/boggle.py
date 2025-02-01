@@ -74,19 +74,11 @@ def dfs_helper( position:tuple, myBoard:list, path:list, valid_words:list, prefi
         # fall out early
         return 
     
-    # # check if word in valid words
-    # if DEBUG:
-    #     print(LEVEL_SEP * level, end="")
-    #     print(f"(?) Checking if {word} is valid...")
 
     if word in valid_words:
 
         # add to results
         results.add(word)
-
-        # if DEBUG:
-        #     print(LEVEL_SEP * level, end="")
-        #     print(f"(!) {word} is a valid boggle word!!!\n")
 
     # add path explored
     path.append( position )
