@@ -150,7 +150,7 @@ def possibleMoves(xy_pair, board_object):
             moveDiagUpRight 
         ]
     
-    # try true moves
+    # try moves
     for action in actions:
 
         # try moving to new position
@@ -162,92 +162,6 @@ def possibleMoves(xy_pair, board_object):
             # add to set
             moves.add( movement )
 
-
-    ###################################################
-    # Algorithm that does not use function references #
-    ###################################################
-
-    # '''
-    # Upper Regions
-    # '''
-
-    # # try moving up
-    # movement = moveUp( xy_pair, n )
-    
-    # # validate movement
-    # if movement != None:
-
-    #     # add to set
-    #     moves.add( movement )
-
-    #     # try moving left from upper
-    #     left_movement = moveLeft( movement, n )
-
-    #     # validate left movement
-    #     if left_movement != None:
-
-    #         # add to set
-    #         moves.add( left_movement )
-
-    #     # try moving right from upper
-    #     right_movement = moveRight( movement, n )
-
-    #     # validate right movement
-    #     if right_movement != None:
-
-    #         # add to set
-    #         moves.add( right_movement )
-
-    # '''
-    # True Right 
-    # '''
-
-    # # go right
-    # movement = moveRight( xy_pair, n )
-    # if movement != None:
-    #     moves.add( movement )
-
-    # '''
-    # True left 
-    # '''
-
-    # # go left
-    # movement = moveLeft( xy_pair, n )
-    # if movement != None:
-    #     moves.add( movement )
-
-
-    # '''
-    # Lower Region 
-    # '''
-
-    # # Attempt moving down
-    # movement = moveDown( xy_pair, n )
-
-    # # validate moving down
-    # if movement != None:
-
-    #     # add to set
-    #     moves.add( movement )
-
-    #     # go left 
-    #     left_movement = moveLeft( movement, n )
-
-    #     # validate left movment
-    #     if left_movement != None:
-
-    #          # add to set
-    #         moves.add( left_movement )
-
-    #     # go right 
-    #     right_movement = moveRight( movement, n )
-
-    #     # validate right movement
-    #     if right_movement != None:
-
-    #         # add to set
-    #         moves.add( right_movement )  
-     
     # print moves
     print( moves )
 
