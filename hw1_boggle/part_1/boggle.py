@@ -1,6 +1,7 @@
+import time
 from movement import *
 
-DEBUG = True
+DEBUG = False
 CLEVER = False
 LINE_LEN = 120
 LINE_SEP = "="
@@ -11,7 +12,7 @@ MIN_WORD_LEN = 2
 def dfs( myBoard:list, valid_words:list ):
 
     # initialize variable
-    recursions = 0
+    recursions = [0]
     level = 0
     results = set()
     prefixes = loadPrefixes( valid_words )
@@ -35,25 +36,26 @@ def dfs( myBoard:list, valid_words:list ):
             position = (row, col)
 
             # run DFS helper
-            dfs_helper( position, myBoard, path, valid_words, prefixes, results, level )
+            dfs_helper( position, myBoard, path, valid_words, prefixes, results, level, recursions )
 
         if DEBUG:
             print(LINE_SEP *  LINE_LEN)
 
     # return results 
-    return results
+    return results, recursions[0]
 
-def dfs_helper( position:tuple, myBoard:list, path:list, valid_words:list, prefixes:set, results:set, level:int):
+def dfs_helper( position:tuple, myBoard:list, path:list, valid_words:list, prefixes:set, results:set, level:int, recursions:list):
 
-    # go in a level 
+    # initialize variables
     level += 1
+    recursions[0] += 1
 
     # print debug
     if DEBUG:
         print(LINE_SEP *  LINE_LEN)
 
     # initialize variables 
-    word, in_prefixes = examineState( myBoard, position, path, prefixes, level )
+    word, in_prefixes = examineState( myBoard, position, path, prefixes )
 
     if DEBUG :
         print(f'''
@@ -73,8 +75,8 @@ def dfs_helper( position:tuple, myBoard:list, path:list, valid_words:list, prefi
             print(f"(!) {word} is a dead end.")
         # fall out early
         return 
-    
 
+    # save 
     if word in valid_words:
 
         # add to results
@@ -105,24 +107,17 @@ def dfs_helper( position:tuple, myBoard:list, path:list, valid_words:list, prefi
         print()
         print()
 
-
     # recursively explore each legal move 
     for position in legal_moves:
 
         # recurse
-        dfs_helper( position, myBoard, path, valid_words, prefixes, results, level )
+        dfs_helper( position, myBoard, path, valid_words, prefixes, results, level, recursions )
 
     # backtrack
     path.pop()
         
-def examineState( myBoard, position, path, myDict, level ):
-    '''
-    takes in a boggle board, a current position, a path up to that position, and a dictionary. 
-    It adds the current position’s tile to the path, computes the word now formed by that path, 
-    and returns a tuple of 
-    (<current word generated>, <yes/no depending on whether that word is in dictionary>).
-    '''
-    
+def examineState( myBoard, position, path, myDict ):
+
     # initialize variables
     word = ""
 
@@ -143,6 +138,29 @@ def examineState( myBoard, position, path, myDict, level ):
 
     # return (<current word generated>, <yes/no depending on whether that word is in dictionary>).
     return ( word, word in myDict )
+
+def legalMoves( moves, path):
+    '''
+    Takes in a list of possible moves as well as a path (list of x-y pairs) of places you’ve already been, 
+    and essentially subtracts the latter from the former: the only legal moves are possible moves minus 
+    any places that you’ve already been.
+    '''
+    # initialize variables
+    legalMoves = set()
+
+    #print( moves, path )
+
+    # loop through path
+    for move in moves:
+        
+        # determine if move has been visited
+        if move not in path:
+
+            # destructively remove the move
+            legalMoves.add( move )
+            
+    # return moves
+    return legalMoves
 
 def loadBoard( filename ):
 
@@ -181,7 +199,7 @@ def loadPrefixes( valid_words ):
         for index in range( len( word ) ):
 
             # add chunk of text to prefixes
-            prefixes.add( word[:index].upper() )
+            prefixes.add( word[:index+1].upper() )
 
     # return prefixes
     return prefixes
@@ -207,24 +225,29 @@ def printBoard( board_object ):
 
     # end row loop
 
-def printResults( results ):
+def printResults( results, recursions, seconds ):
 
     current_len = MIN_WORD_LEN
+    total_words = len( results )
     results = list( results )
-    results.sort() # sorts normally by alphabetical order
+    #results.sort() # sorts normally by alphabetical order
     results.sort(key=len) # sorts by descending length
 
     # results have been found 
-    if len( results ) > 0 :
+    if total_words > 0 :
 
-        # new line
-        print()
+    
+        # summary
+        print(f"\nSearched a total of {recursions} moves in {seconds} seconds.\n")
+
+        # words found
+        print("Words found:")
 
         # prime the loop
         print(f"{current_len}-letter words: {results[0]}", end="")
 
         # print the rest of results
-        for index in range(1, len(results) - 1):
+        for index in range(1, len(results) ):
 
             # grab result at index
             result = results[index]
@@ -238,13 +261,16 @@ def printResults( results ):
 
         print()
         print()
-        print(f"Found { len(results) } words in total.")
+        print(f"Found { total_words } words in total.")
         print("Alpha-sorted list words:")
         results.sort()
 
-        for word in results:
+        # prime the loop
+        print( results[0], end="" )
 
-            print( word, end=", ")
+        for index in range(1, len( results ) ):
+
+            print( f", {results[index]}", end="")
 
         print()
 
@@ -255,9 +281,6 @@ def printResults( results ):
 
 # reads the dictionary into python as a list.
 def readDictionary( filename ):
-
-    # print debug
-    print(LINE_SEP *  LINE_LEN)
 
     # initialize variables
     word_list = []
@@ -295,10 +318,15 @@ def runBoard(board_filename, dictionary_filename):
     print(f"Running with cleverness: {CLEVER}")
 
     # dfs
-    results = dfs( myBoard, valid_words )
+    start_time = time.time()
+    results, recursions = dfs( myBoard, valid_words )
+    end_time = time.time()
+
+    # calculate seconds
+    seconds = round(end_time - start_time, 4)
 
     # Done!
     print("All Done!")
 
     # print results
-    printResults( results )
+    printResults( results, recursions, seconds )
