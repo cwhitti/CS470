@@ -2,10 +2,11 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 
-def graphCurve( csv_file:str, graph_file:str ):
+def graphCurve(csv_file: str, graph_file: str):
     '''
-    Come up with a curve showing your results.
+    Generate a curve showing the average solving time per board size with error bars.
     '''
 
     # Load the CSV file
@@ -15,26 +16,30 @@ def graphCurve( csv_file:str, graph_file:str ):
     if not {'N', 'seconds'}.issubset(df.columns):
         raise ValueError("CSV file must contain 'N' and 'seconds' columns")
 
-    # Aggregate average seconds per board size
-    avg_times = df.groupby('N')['seconds'].mean().reset_index()
+    # Aggregate statistics per board size
+    stats = df.groupby('N')['seconds'].agg(['mean', 'std', 'count']).reset_index()
 
     # Sort values for plotting
-    avg_times = avg_times.sort_values(by='N')
+    stats = stats.sort_values(by='N')
 
-    # Generate X-axis ticks from min to max N with a step of 1
-    min_N, max_N = avg_times['N'].min(), avg_times['N'].max()
+    # Compute standard error for error bars
+    stats['stderr'] = stats['std'] / np.sqrt(stats['count'])
+
+    # Generate X-axis ticks
+    min_N, max_N = stats['N'].min(), stats['N'].max()
     x_ticks = np.arange(min_N, max_N + 1, 1)
 
-    # Plot the curve
+    # Plot the curve with error bars
     plt.figure(figsize=(8, 5))
-    plt.plot(avg_times['N'], avg_times['seconds'], marker='o', linestyle='-')
+    plt.errorbar(stats['N'], stats['mean'], yerr=stats['stderr'], fmt='o-', capsize=5, label="Average Time")
 
     # Labeling the graph
-    plt.xlabel("Board Size (N)")
-    plt.ylabel("Average Time to Solve (Seconds)")
-    plt.title(f"Boggle Board Solving Time vs. Board Size (n={df.shape[0]})")
-    plt.xticks(x_ticks)  # Ensure X-axis increments by 1
+    plt.xlabel("Board Size (N xN)", fontsize=13)
+    plt.ylabel("Solving Time (s)", fontsize=13)
+    plt.title(f"Boggle Board Solving Time vs. Board Size (n={df.shape[0]})", fontsize=13.5)
+    plt.xticks(x_ticks)
     plt.grid(True)
+    plt.legend()
 
     # Save the graph
     plt.savefig(graph_file)
@@ -59,17 +64,14 @@ def graphTimeComplexity( csv_file:str, graph_file:str ):
     plt.savefig(graph_file)
     plt.close()
 
-def makeTable(csv_file, possibilities, graph_file):
+def formatData( df, possibilities ):
 
-    BOARD_SIZE_STR = "Board Size (N x N)"
-    NUM_BOARDS_STR = "# of Boards"
-    SOLVE_STR = "Avg. Solving Time (s)"
-    AVG_MOVES_STR = "Avg. Moves"
-    AVG_VALID_STR = "Avg. Valid Words"
+    BOARD_SIZE_STR = "  Board Size \n(N x N)"
+    NUM_BOARDS_STR = "Number \nof Boards"
+    SOLVE_STR = "Average \nSolving Time (s)"
+    AVG_MOVES_STR = "Average\nMoves"
+    AVG_VALID_STR = "Average\nValid Words"
     TOTAL_STR = "Possible Combinations"
-
-    # Load data
-    df = pd.read_csv(csv_file)
     
     # Aggregate data
     table_data = df.groupby("N").agg(
@@ -93,31 +95,67 @@ def makeTable(csv_file, possibilities, graph_file):
                             inplace=True)
     
     # Round numeric values for readability
-    table_data[SOLVE_STR] = table_data[SOLVE_STR].round(4)
+    table_data[SOLVE_STR] = table_data[SOLVE_STR].round(2)
     table_data[AVG_VALID_STR] = table_data[AVG_VALID_STR].round(2)
     table_data[AVG_MOVES_STR] = table_data[AVG_MOVES_STR].round(2)
     
     # Format large numbers with commas
     table_data[NUM_BOARDS_STR] = table_data[NUM_BOARDS_STR].apply(lambda x: f"{x:,}")
-    #table_data[TOTAL_STR] = table_data[TOTAL_STR].apply(lambda x: f"{int(x):,}")
+    table_data[AVG_MOVES_STR] = table_data[AVG_MOVES_STR].apply(lambda x: f"{int(x):,}")
+    table_data[AVG_VALID_STR] = table_data[AVG_VALID_STR].apply(lambda x: f"{int(x):,}")
 
-    # Create the figure and axis
-    fig, ax = plt.subplots(figsize=(8, 4))
-    ax.axis("tight")
+    return table_data
+
+
+def makeTable(csv_file, possibilities, graph_file):
+
+    # Load data
+    df = pd.read_csv(csv_file)
+
+    # format the data
+    table_data = formatData( df, possibilities )
+
+    # Create figure
+    fig, ax = plt.subplots(figsize=(4.6, 2.6))
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, len(table_data) + 2)
     ax.axis("off")
     
-    # Create table
-    table = ax.table(cellText=table_data.values,
-                     colLabels=table_data.columns,
-                     cellLoc="center",
-                     loc="center")
+    # Define colors for alternating rows and headers
+    colors = ["#FFFFFF", "#f0f0f0"]
+    header_color = "#dbdbdb"
+
+    NUM1 = 1
+    NUM2 = 1.2
     
-    # Adjust table scaling
-    table.auto_set_font_size(False)
-    table.set_fontsize(8)
-    table.scale(1.2, 1.2)
+    # Draw alternating row colors
+    for i in range(len(table_data)):
+        ax.add_patch(patches.Rectangle((0, i), NUM1, NUM2, color=colors[i % 2]))
     
-    # Save as image
+    # Draw header background
+    ax.add_patch(patches.Rectangle((0, len(table_data)), NUM1, NUM2, color=header_color))
+    
+    shift_text_h = 0.09
+    shift_text_v = 0.5
+    # Draw table text
+    for i, row in table_data.iterrows():
+        for j, text in enumerate(row):
+            #ax.text(j / len(table_data.columns) + 0.05, len(table_data) - i - 0.5, str(text),
+            ax.text(j / len(table_data.columns) + shift_text_h, len(table_data) - i - shift_text_v, str(text),
+                    va='center', 
+                    ha='center', 
+                    fontsize=6)
+    
+    # Draw header with bold text
+    for j, header in enumerate(table_data.columns):
+        ax.text(j / len(table_data.columns) + shift_text_h, len(table_data) + shift_text_v + 0.05, header,
+                va='center', 
+                ha='center', 
+                fontsize=5.5, 
+                fontweight='bold'
+                )
+    
+    # Save the table as an image
     plt.savefig(graph_file, bbox_inches="tight", dpi=300)
     plt.close()
 

@@ -90,7 +90,6 @@ def main( new_data = False ):
     results = {}
     boggle_combos = {}
 
-    print(f"Outputting to: {CSV_FILE}")
     # compute boggle combos
     for index in range( LOWER_BOUND, UPPER_BOUND + 1):
 
@@ -100,6 +99,9 @@ def main( new_data = False ):
 
     # generate new data if we want
     if new_data == True:
+
+        # confirmation message
+        print(f"Outputting to: {CSV_FILE}")
 
         # loop through number of boards
         for index in range( boards ):
@@ -134,4 +136,4 @@ def main( new_data = False ):
     graphs.graphTimeComplexity( CSV_FILE, "graphs/timeComplexity.png")
 
 
-main( new_data = True )
+main( new_data = False )
