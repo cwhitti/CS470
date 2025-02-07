@@ -309,12 +309,12 @@ def runBoard(board_filename, dictionary_filename):
     valid_words = readDictionary( dictionary_filename )
     
     # display board
-    printBoard( myBoard )
+    # printBoard( myBoard )
 
     # print intro message:
-    print()
-    print("And we're off!")
-    print(f"Running with cleverness: {CLEVER}")
+    # print()
+    # print("And we're off!")
+    # print(f"Running with cleverness: {CLEVER}")
 
     # dfs
     start_time = time.time()
@@ -324,8 +324,11 @@ def runBoard(board_filename, dictionary_filename):
     # calculate seconds
     seconds = round(end_time - start_time, 4)
 
-    # Done!
-    print("All Done!")
+    data = {
+        "N": len( myBoard ),
+        "seconds": seconds,
+        "word_count": len( results ), 
+        "word_list": list(results)
+    }
 
-    # print results
-    printResults( results, recursions, seconds )
+    return data

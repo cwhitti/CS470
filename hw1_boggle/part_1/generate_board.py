@@ -1,7 +1,7 @@
 import random
 import string
 
-def generate_boggle_board(size=10):
+def generate_boggle_board(size=100):
     """Generates a square Boggle board of the given size."""
     board = [[random.choice(string.ascii_uppercase) for _ in range(size)] for _ in range(size)]
     return board
