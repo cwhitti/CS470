@@ -1,9 +1,11 @@
 import graphs
 from boggle import *
-from math import factorial
 import random, string, csv
 
-CSV_FILE = "results/results.csv"
+LOWER_BOUND = 2
+UPPER_BOUND = 10 
+
+CSV_FILE = f"results/results_{LOWER_BOUND}-{UPPER_BOUND}.csv"
 DICT_FILE = "twl06.txt"
 OUT_FILE = "boards/random_board.txt"
 CHARLIST = string.ascii_uppercase
@@ -22,13 +24,6 @@ def boggleCombinations( N ):
 
     return total_combinations
 
-
-def boggleCombinations(N):
-    """Calculate an upper-bound estimate of the number of possible letter sequences on an NxN Boggle board."""
-    avg_branching_factor = 6  # Approximate branching factor per step
-    total_tiles = N * N  # Total number of tiles
-    estimated_sequences = N**2 * (avg_branching_factor ** total_tiles)
-    return estimated_sequences
 
 def generateBoard( N:int, filename ):
     
@@ -88,50 +83,55 @@ def writeToCSV(filename, results):
             # write row to file
             writer.writerow(row)
 
-def main():
+def main( new_data = False ):
 
     # initialize variables
     boards = 1000
     results = {}
     boggle_combos = {}
-    lower_bound = 2
-    upper_bound = 5
 
+    print(f"Outputting to: {CSV_FILE}")
     # compute boggle combos
-    for index in range( lower_bound, upper_bound + 1):
+    for index in range( LOWER_BOUND, UPPER_BOUND + 1):
 
         # find combos
         combos = boggleCombinations( index )
         boggle_combos[ index ] =  combos
 
-    # loop through number of boards
-    for index in range( boards ):
+    # generate new data if we want
+    if new_data == True:
 
-        # make sim num
-        sim_num = str(index + 1)
+        # loop through number of boards
+        for index in range( boards ):
 
-        print(f"[{sim_num}] Running board...")
+            # make sim num
+            sim_num = str(index + 1)
 
-        # generate a N between upper and lower bounds
-        N = random.randint( lower_bound, upper_bound)
+            # generate a N between upper and lower bounds
+            N = random.randint( LOWER_BOUND, UPPER_BOUND)
 
-        # generate a board
-            # function: generate_board( N, OUT_FILE )
-        generateBoard( N, OUT_FILE )
+            # Output to console
+            print(f"[{sim_num}] Running board size {N}...")
 
-        # run the board solver
-            # function: run_board( OUTFILE, DICT_FILE )
-        sim_data = runBoard( OUT_FILE, DICT_FILE )
+            # generate a board
+                # function: generate_board( N, OUT_FILE )
+            generateBoard( N, OUT_FILE )
 
-        # save sim data
-        results[ sim_num ] = sim_data
+            # run the board solver
+                # function: run_board( OUTFILE, DICT_FILE )
+            sim_data = runBoard( OUT_FILE, DICT_FILE )
 
-    # put results in CSV
-        # function: write_to_csv( CSV_FILE, results )
-    writeToCSV( CSV_FILE, results )
+            # save sim data
+            results[ sim_num ] = sim_data
+
+        # put results in CSV
+            # function: write_to_csv( CSV_FILE, results )
+        writeToCSV( CSV_FILE, results )
 
     # analyze CSV file
+    graphs.graphCurve( CSV_FILE, "graphs/curve.png" )
     graphs.makeTable( CSV_FILE, boggle_combos, "graphs/boggleTable.png")
     graphs.graphTimeComplexity( CSV_FILE, "graphs/timeComplexity.png")
 
-# main()
+
+main( new_data = True )

@@ -148,8 +148,6 @@ def legalMoves( moves, path):
     # initialize variables
     legalMoves = set()
 
-    #print( moves, path )
-
     # loop through path
     for move in moves:
         
@@ -203,7 +201,6 @@ def loadPrefixes( valid_words ):
 
     # return prefixes
     return prefixes
-
 
 def printBoard( board_object ):
 
@@ -311,11 +308,6 @@ def runBoard(board_filename, dictionary_filename):
     # display board
     # printBoard( myBoard )
 
-    # print intro message:
-    # print()
-    # print("And we're off!")
-    # print(f"Running with cleverness: {CLEVER}")
-
     # dfs
     start_time = time.time()
     results, recursions = dfs( myBoard, valid_words )
@@ -326,6 +318,7 @@ def runBoard(board_filename, dictionary_filename):
 
     data = {
         "N": len( myBoard ),
+        "moves": recursions,
         "seconds": seconds,
         "word_count": len( results ), 
         "word_list": list(results)
