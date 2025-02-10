@@ -4,45 +4,85 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
+plt.rcParams["font.family"] = "sans-serif"
+
 def graphCurve(csv_file: str, graph_file: str):
     '''
-    Generate a curve showing the average solving time per board size with error bars.
+    Generate a curve showing the average solving time per board size with error bars,
+    along with a secondary axis for the number of moves.
     '''
 
+    BLUE = "#0077b6"
+    RED = "#c1121f"
     # Load the CSV file
     df = pd.read_csv(csv_file)
 
     # Ensure relevant columns exist
-    if not {'N', 'seconds'}.issubset(df.columns):
-        raise ValueError("CSV file must contain 'N' and 'seconds' columns")
+    if not {'N', 'seconds', 'word_count'}.issubset(df.columns):
+        raise ValueError("CSV file must contain 'N', 'seconds', and 'word_count' columns")
 
     # Aggregate statistics per board size
-    stats = df.groupby('N')['seconds'].agg(['mean', 'std', 'count']).reset_index()
+    stats = df.groupby('N').agg({
+        'seconds': ['mean', 'std', 'count'],
+        'word_count': 'mean'
+    }).reset_index()
+
+    # Flatten multi-index columns
+    stats.columns = ['N', 'mean_time', 'std_time', 'count', 'mean_word_count']
 
     # Sort values for plotting
     stats = stats.sort_values(by='N')
 
     # Compute standard error for error bars
-    stats['stderr'] = stats['std'] / np.sqrt(stats['count'])
+    stats['stderr_time'] = stats['std_time'] / np.sqrt(stats['count'])
 
     # Generate X-axis ticks
     min_N, max_N = stats['N'].min(), stats['N'].max()
     x_ticks = np.arange(min_N, max_N + 1, 1)
 
-    # Plot the curve with error bars
-    plt.figure(figsize=(8, 5))
-    plt.errorbar(stats['N'], stats['mean'], yerr=stats['stderr'], fmt='o-', capsize=5, label="Average Time")
+    # Create figure and axis
+    fig, ax1 = plt.subplots(figsize=(7.5, 5))
 
-    # Labeling the graph
-    plt.xlabel("Board Size (N xN)", fontsize=13)
-    plt.ylabel("Solving Time (s)", fontsize=13)
-    plt.title(f"Boggle Board Solving Time vs. Board Size (n={df.shape[0]})", fontsize=13.5)
-    plt.xticks(x_ticks)
-    plt.grid(True)
-    plt.legend()
+    # Primary Y-axis: Solving Time
+    ax1.errorbar(stats['N'], stats['mean_time'], yerr=stats['stderr_time'], fmt='o-', capsize=5, label="Avg. Time", color=BLUE)
+    ax1.set_xlabel("Board Size (N x N)", 
+                   fontsize=13
+                   )
+    ax1.set_ylabel("Solving Time (s)", 
+                   fontsize=13, 
+                   #color=BLUE
+                   )
+    ax1.tick_params(axis='y', 
+                    #labelcolor=BLUE
+                    )
+
+    # Secondary Y-axis: Number of Moves
+    # ax2 = ax1.twinx()
+    # ax2.plot(stats['N'], stats['mean_word_count'], 'o-', label="Avg Valid Words", color=RED)
+    # ax2.set_ylabel("Average Valid Words", fontsize=13, color=RED)
+    # ax2.tick_params(axis='y', labelcolor=RED)
+
+    # Title and formatting
+    plt.title(f"Boggle Board Size vs. Solving Time (n={df.shape[0]})", fontsize=13.5)
+    ax1.set_xticks(x_ticks)
+    ax1.grid(True)
+
+    # Legends
+    ax1.legend(loc="upper left")
+    #ax2.legend(loc="upper right")
+
+    plt.subplots_adjust(bottom=0.2)
+    plt.suptitle('''Figure 1.1: The relationship between board size and solving time shows an early 
+                 exponential relationship, which suggests an increase in computational complexity.''', 
+                 fontsize=10, 
+                 y=0.085
+                 )
+
 
     # Save the graph
     plt.savefig(graph_file)
+    plt.close()
+    # plt.show()
     
 def graphTimeComplexity( csv_file:str, graph_file:str ):
     '''
@@ -75,7 +115,7 @@ def formatData( df, possibilities ):
     
     # Aggregate data
     table_data = df.groupby("N").agg(
-        Number_of_Boards=("simulation_num", "count"),
+        #Number_of_Boards=("simulation_num", "count"),
         Average_Solving_Time_s=("seconds", "mean"),
         Average_Moves=("moves", "mean"),
         Average_Words_Found=("word_count", "mean"),
@@ -86,7 +126,7 @@ def formatData( df, possibilities ):
     # Rename column for readability
     table_data.rename(columns={
                             "N": BOARD_SIZE_STR,
-                            "Number_of_Boards": NUM_BOARDS_STR,
+                            #"Number_of_Boards": NUM_BOARDS_STR,
                             "Average_Solving_Time_s": SOLVE_STR,
                             "Average_Moves": AVG_MOVES_STR,
                             "Average_Words_Found": AVG_VALID_STR,
@@ -100,7 +140,7 @@ def formatData( df, possibilities ):
     table_data[AVG_MOVES_STR] = table_data[AVG_MOVES_STR].round(2)
     
     # Format large numbers with commas
-    table_data[NUM_BOARDS_STR] = table_data[NUM_BOARDS_STR].apply(lambda x: f"{x:,}")
+    #table_data[NUM_BOARDS_STR] = table_data[NUM_BOARDS_STR].apply(lambda x: f"{x:,}")
     table_data[AVG_MOVES_STR] = table_data[AVG_MOVES_STR].apply(lambda x: f"{int(x):,}")
     table_data[AVG_VALID_STR] = table_data[AVG_VALID_STR].apply(lambda x: f"{int(x):,}")
 
@@ -116,7 +156,8 @@ def makeTable(csv_file, possibilities, graph_file):
     table_data = formatData( df, possibilities )
 
     # Create figure
-    fig, ax = plt.subplots(figsize=(4.6, 2.6))
+    fig, ax = plt.subplots(figsize=(5.5, 2.5))
+    # fig, ax = plt.subplots(figsize=(4.6, 2.6))
     ax.set_xlim(0, 1)
     ax.set_ylim(0, len(table_data) + 2)
     ax.axis("off")
@@ -136,7 +177,8 @@ def makeTable(csv_file, possibilities, graph_file):
     ax.add_patch(patches.Rectangle((0, len(table_data)), NUM1, NUM2, color=header_color))
     
     shift_text_h = 0.09
-    shift_text_v = 0.5
+    shift_text_v = 0.6
+
     # Draw table text
     for i, row in table_data.iterrows():
         for j, text in enumerate(row):
@@ -148,18 +190,20 @@ def makeTable(csv_file, possibilities, graph_file):
     
     # Draw header with bold text
     for j, header in enumerate(table_data.columns):
-        ax.text(j / len(table_data.columns) + shift_text_h, len(table_data) + shift_text_v + 0.05, header,
+        ax.text(j / len(table_data.columns) + shift_text_h, len(table_data) + shift_text_v - 0.08, header,
                 va='center', 
                 ha='center', 
                 fontsize=5.5, 
                 fontweight='bold'
                 )
     
+    # subtitle
+    plt.suptitle(f'''n={df.shape[0]}''', 
+                fontsize=5.5, 
+                x=0.18,
+                y=0.08
+                )
     # Save the table as an image
     plt.savefig(graph_file, bbox_inches="tight", dpi=300)
+    plt.show()
     plt.close()
-
-if __name__=="__main__":
-
-    #makeTable( "results/results_2-6.csv",  )
-    graphTimeComplexity( "results/results_2-6.csv", "graphs/test.png")

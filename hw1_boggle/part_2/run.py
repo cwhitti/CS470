@@ -2,13 +2,18 @@ import graphs
 from boggle import *
 import random, string, csv
 
+# numerical constants
 LOWER_BOUND = 2
-UPPER_BOUND = 10 
+UPPER_BOUND = 10
+BOARDS = 100
 
+# string constants
 CSV_FILE = f"results/results_{LOWER_BOUND}-{UPPER_BOUND}.csv"
 DICT_FILE = "twl06.txt"
 OUT_FILE = "boards/random_board.txt"
+GRAPH_DEST = F"graphs/{LOWER_BOUND}-{UPPER_BOUND}"
 CHARLIST = string.ascii_uppercase
+
 
 
 def boggleCombinations( N ):
@@ -86,8 +91,6 @@ def writeToCSV(filename, results):
 def main( new_data = False ):
 
     # initialize variables
-    boards = 1000
-    results = {}
     boggle_combos = {}
 
     # compute boggle combos
@@ -100,17 +103,37 @@ def main( new_data = False ):
     # generate new data if we want
     if new_data == True:
 
-        # confirmation message
-        print(f"Outputting to: {CSV_FILE}")
+        # run the boards
+        results = runBoards()
 
-        # loop through number of boards
-        for index in range( boards ):
+        # put results in CSV
+            # function: write_to_csv( CSV_FILE, results )
+        writeToCSV( CSV_FILE, results )
 
-            # make sim num
-            sim_num = str(index + 1)
+    # analyze CSV file
+    graphs.graphCurve( CSV_FILE, f"{GRAPH_DEST}/curve-{LOWER_BOUND}-{UPPER_BOUND}.png" )
+    graphs.makeTable( CSV_FILE, boggle_combos, f"{GRAPH_DEST}/boggleTable-{LOWER_BOUND}-{UPPER_BOUND}.png")
 
-            # generate a N between upper and lower bounds
-            N = random.randint( LOWER_BOUND, UPPER_BOUND)
+def runBoards():
+
+    # initialize variables
+    sim_num = 0
+    results = {}
+
+    # confirmation message
+    print(f"Outputting to: {CSV_FILE}")
+
+    # loop through number of boards
+    for index in range( UPPER_BOUND - LOWER_BOUND + 1 ):
+
+        # Grab the N
+        N = 2 + index
+
+        # run boards of size N
+        for sim_board in range( BOARDS ):
+
+            # increment sim num
+            sim_num += 1
 
             # Output to console
             print(f"[{sim_num}] Running board size {N}...")
@@ -126,14 +149,8 @@ def main( new_data = False ):
             # save sim data
             results[ sim_num ] = sim_data
 
-        # put results in CSV
-            # function: write_to_csv( CSV_FILE, results )
-        writeToCSV( CSV_FILE, results )
-
-    # analyze CSV file
-    graphs.graphCurve( CSV_FILE, "graphs/curve.png" )
-    graphs.makeTable( CSV_FILE, boggle_combos, "graphs/boggleTable.png")
-    graphs.graphTimeComplexity( CSV_FILE, "graphs/timeComplexity.png")
+    # return results
+    return results
 
 
 main( new_data = False )
