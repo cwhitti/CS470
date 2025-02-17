@@ -1,0 +1,71 @@
+$ python interpreter.py 05_homework.py
+
+...
+
+>>> # (b) Show your program loading in the 30-node sample file. 
+
+>>> s=Searcher("samplemap.txt")
+Loaded search type A* with map in file: samplemap.txt
+
+>>> # (c) Show you program setting start node=U and end node=T. 
+
+>>> s.setStartGoal('U','T')
+
+>>> # myViz should be a DRDViz instance -> save map to file on disk.
+
+>>> s.myViz.save("samplemap.png")
+
+>>> # (d) Show the one open node.
+
+>>> [n.showBasic() for n in s.open]
+[('U', 0)]
+
+>>> # (e) Show successors of only open node.
+
+>>> initial_children = s.successors(s.open.pop(0))
+
+>>> [n.showBasic() for n in initial_children]
+[('AB', 29), ('AE', 23), ('AK', 16), ('AN', 41), ('AQ', 19), ('M', 59)]
+
+>>> 
+
+>>> # (f) Show three inserts: at the front, and the end, and "in order"
+
+>>> def reset_insert(where):
+...     s.reset()
+...     initial_children = s.successors(s.open.pop(0))
+...     insert_method = getattr(s, "insert_"+where)
+...     insert_method(initial_children)
+...     return [n.showBasic() for n in s.open]
+... 
+
+>>> reset_insert("front")
+[('M', 59), ('AQ', 19), ('AN', 41), ('AK', 16), ('AE', 23), ('AB', 29)]
+
+>>> reset_insert("end")
+[('AB', 29), ('AE', 23), ('AK', 16), ('AN', 41), ('AQ', 19), ('M', 59)]
+
+>>> reset_insert("ordered")
+[('AK', 16), ('AQ', 19), ('AE', 23), ('AB', 29), ('AN', 41), ('M', 59)]
+
+>>> 
+
+>>> # (g) INSERT (K,500), (C,91) and (J,10) and show no duplicates.
+
+>>> newdata = (("K",500), ("C",91), ("J",10))
+
+>>> newlist = [SNode(label=label, pathcost=pathcost) for label, pathcost in newdata]
+
+>>> ignored = s.insert_end(newlist)
+
+>>> [n.showBasic() for n in s.open]
+[('AK', 16), ('AQ', 19), ('AE', 23), ('AB', 29), ('AN', 41), ('M', 59), ('K', 500), ('C',91), ('J',10)]
+
+
+>>> 
+
+>>> # 3. hSLD heuritic function being called on three nodes.
+
+>>> [hSLD(x, s) for x in ("V", "AC", "J")]
+[37.107950630558946, 175.93464695732902, 25.495097567963924]
+
