@@ -5,7 +5,6 @@ DFS Algorithm
 class DFS( Frontier ):
 
     def __init__(self, verbose, nodeGraph) -> None:
-        self.open = []
         self.name = "DFS"
         self.verbose = verbose
         self.nodeGraph = nodeGraph
