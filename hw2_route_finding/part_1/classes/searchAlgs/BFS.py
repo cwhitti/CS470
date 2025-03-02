@@ -1,19 +1,68 @@
+from classes.Frontier import Frontier
 
 '''
 BFS algorithm
 '''
-class BFS():
+class BFS( Frontier ):
 
-    def __init__(self, verbose) -> None:
+    def __init__(self, verbose, nodeGraph) -> None:
         self.name = "BFS"
         self.verbose = verbose
-        self.parent = self
+        self.nodeGraph = nodeGraph
 
-    def start( self, *, start_node, goal_node ):
-        return self._BFS()
+        # initialize helper class
+        Frontier.__init__( self, nodeGraph )
 
-    def _BFS( self ):
-        pass
+    def start(self, start_node, goal_node):
 
-    def _BFS_helper(self, graph, current, goal, path,  ):
-        pass
+        # intialize variables
+        self.insert_end( [start_node] )
+        prune_nodes = []
+
+        # call bfs
+        path = self._BFS_helper( goal_node, prune_nodes )
+
+        # return the pruned path
+        return self.prune_path( path, prune_nodes )
+        
+    def _BFS_helper( self, goal_node, prune_nodes ):
+
+        # initialize variables
+        path = []
+
+        # Loop until we find the goal or run out of nodes to explore
+        while len(self.open) > 0:
+
+            # pop top of stack
+            node = self.open.pop(0)
+
+            # print exploring node 
+            print("~" * 100)
+            print(f"Exploring node: {node.label}")
+            
+            # add to visited
+            self.visited.add( node )
+            
+            # Add the node to the path
+            path.append( node )
+
+            # Check if we reached the goal
+            if node.label == goal_node.label:
+                print(f"Success! Found goal node: {goal_node.label}")
+                return path  # Return the path to the goal node
+
+            # not reached, get successors
+            successors = self.successors(node)
+            self.insert_end(successors)
+
+            # check if this is a prune node
+            if self.is_pruneable( successors, goal_node ):
+                prune_nodes.append( node )
+
+            # display open
+            if self.verbose:
+                print("Open list:", [child.label for child in self.open])
+
+        # If no path is found (queue is empty)
+        print("Goal not found!")
+        return None

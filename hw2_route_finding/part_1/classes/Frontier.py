@@ -31,7 +31,7 @@ class Frontier():
         labels = [node.label for node in list]
         return label in labels
 
-    def insertToList( self, index, node, saveList ):
+    def insertToList( self, index:int, node:SearchNode, saveList:list ):
         
         # initialize variables 
         inserted = False 
@@ -48,10 +48,11 @@ class Frontier():
         # return inserted
         return inserted
 
-    def insertToListMultiple( self, unorderedList, officialList, index = None, localVerbose=False ):
+    def insertToListMultiple( self, unorderedList:list, officialList, index = None, localVerbose=False ):
 
         # initialize variables
         ignored = []
+        priority = []
         added = []
 
         # pluck out ignored
@@ -69,8 +70,12 @@ class Frontier():
                     # if so, pop it
                     officialList.pop( officialList.index( node ) )
 
-                # move it to "added"
-                added.append( node )
+                    # add to high priority
+                    priority.append( node )
+
+                else:
+                    # move it to "added"
+                    added.append( node )
                     
             # ignore it if esle
             else:
@@ -78,9 +83,13 @@ class Frontier():
         
         # sort added list 
         added = self.orderNodes( added )
+        priority = self.orderNodes( priority )
 
         # extend list
         officialList[index:index] = added
+
+        # extend high priority
+        officialList[0:0] = priority
 
         # verbose
         if self.verbose and localVerbose:
@@ -94,7 +103,7 @@ class Frontier():
         # return ignored
         return ignored
     
-    def insert_end( self, unorderedList, saveList=None ):
+    def insert_end( self, unorderedList:list, saveList=None ):
 
         # throw in save list
         if saveList != None:
@@ -117,7 +126,7 @@ class Frontier():
         # return ignored 
         return ignored 
 
-    def insert_front( self, unorderedList, saveList=None ):
+    def insert_front( self, unorderedList:list, saveList=None ):
 
         # initialize variables 
         insert_index = 0
@@ -137,7 +146,7 @@ class Frontier():
         # return ignored 
         return ignored 
 
-    def insert_ordered(self, unorderedList, saveList=None, alpha=True, localVerbose=False ):
+    def insert_ordered(self, unorderedList:list, saveList=None, alpha=True, localVerbose=False ):
 
         # inititalized variables
         insert_index = 0
@@ -160,6 +169,8 @@ class Frontier():
         # return ignored
         return ignored
     
+    def is_pruneable( self, successors, goal_node):
+        return goal_node.label in [child.label for child in successors]
 
     def prune_path( self, path, prune_nodes ):
 
@@ -196,7 +207,7 @@ class Frontier():
         return best_path
 
         
-    def orderNodes( self, unorderedList, alpha=True ):
+    def orderNodes( self, unorderedList:list, alpha=True ):
 
         # initialize variables 
 

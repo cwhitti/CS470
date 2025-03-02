@@ -8,13 +8,13 @@ from classes.Search import Searcher
 # x.search()
 
 # 10test.txt map
-x=Searcher("10test.txt", searchType="DEPTH", verbose=True)
-x.setStartGoal('h','k')
-x.search()
-
-# x=Searcher("10test.txt", searchType="BREADTH", verbose=True)
+# x=Searcher("10test.txt", searchType="DEPTH", verbose=True)
 # x.setStartGoal('h','k')
 # x.search()
+
+x=Searcher("10test.txt", searchType="BREADTH", verbose=True)
+x.setStartGoal('h','k')
+x.search()
 
 # x=Searcher("10test.txt", searchType="BEST", verbose=True)
 # x.setStartGoal('h','k')
