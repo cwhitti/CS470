@@ -51,9 +51,12 @@ class Searcher( Algorithm ):
         print("Starting alg...")
         prunedPath = self.startAlgorithm()
 
-        labels = [ step.label for step in prunedPath ]
+        if prunedPath != None:
+            labels = [ step.label for step in prunedPath ]
+            print(f"Success! Reached goal node {self.goal_letter} with path: {labels}")
 
-        print(f"Success! Reached goal node {self.goal_letter} with path: {labels}")
+        else:
+            print("Unble to complete algorithm.")
 
     def loadGraph( self, filename ):
         '''

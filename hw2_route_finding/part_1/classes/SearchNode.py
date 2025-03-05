@@ -1,3 +1,4 @@
+from classes.CONSTANTS import *
 import math 
 
 class SearchNode():
@@ -11,21 +12,26 @@ class SearchNode():
         self.x = x
         self.y = y
 
+        # set extras
+        self.depth = 0   
+        self.totalCost = 0
+        self.heur = self.pathcost
+
         # initialize dynamic variables
         self.children = []
     
     def addChild( self, childNode ):
         self.children.append( childNode )
         return True
+
+    def constructBasic( self ):
+        return f"{self.label};{self.depth};{self.pathcost:.2f} {self.totalCost:.2f};{self.heur:.2f}"
     
     def getChildren(self):
         return sorted(self.children, key=lambda node: node.label)
     
     def showBasic( self ):
-        print ( f"\nLabel: { self.label}" )
-        print ( f"\t- Position: {self.x}, {self.y}" )
-        print ( f"\t- Cost from Parent: {self.pathcost}" )
-        return ( (self.label, self.pathcost) )
+        return self.constructBasic( )
 
     def showChildren( self ):
 
@@ -35,10 +41,3 @@ class SearchNode():
             childNode.showBasic()
             print ( f"\t- Heuristic from Parent: { self.hSLD( childNode ) }" )
         print("==========================")
-    
-    def hSLD(self, compNode):
-
-        # Calculate the heuristic straight line distance (Euclidean distance)
-        x1, y1 = self.x, self.y
-        x2, y2 = compNode.x, compNode.y
-        return round( math.sqrt((x1 - x2)**2 + (y1 - y2)**2), 4 )

@@ -1,11 +1,27 @@
+import math
+from classes.CONSTANTS import *
 from classes.SearchNode import SearchNode
 
 class Frontier():
 
-    def __init__(self, nodeGraph) -> None:
+    def __init__(self, nodeGraph, alg_type="Basic") -> None:
         self.open = []
         self.visited = set()
         self.nodeGraph = nodeGraph 
+
+        self.careCost = False
+        self.careHeur = False
+
+        # see if we care about cost
+        if alg_type in [ BestFS_str, ASTAR_str ]:
+            self.careCost = False
+            if alg_type == ASTAR_str:
+                self.careHeur = False
+
+    def showOpen( self ):
+        print("Open List: ", end = None)
+
+        print( [elm.showBasic() for elm in self.open] )
 
     def findNode( self, label ):
         
@@ -117,6 +133,8 @@ class Frontier():
         # throw in open list
         else:
 
+            print( unorderedList )
+
             # define variables
             insert_index = len( self.open )
             
@@ -220,7 +238,7 @@ class Frontier():
         # return ordered nodes
         return unorderedList
         
-    def successors( self, parentNode:SearchNode ) -> list[SearchNode]:
+    def successors( self, parentNode:SearchNode, depth=None ) -> list[SearchNode]:
 
         # initialize variables
         nodes = []
@@ -235,9 +253,35 @@ class Frontier():
             # loop through children list
             for child in childrenList:
 
+                # save cost info 
+                pathcost = child.pathcost
+
                 # find the node
                 foundNode = self.findNode( child.label )
-                nodes.append( foundNode )
+
+                # change depth of node
+                foundNode.depth = depth 
+                foundNode.pathcost = pathcost
+                foundNode.heur =  foundNode.pathcost
+
+                # See about extras
+                if self.careCost or self.careHeur:
+
+                    # set total cost
+                    foundNode.totalCost = parentNode.totalCost + foundNode.pathcost
+                    
+                    # Do we care about the heuristic?
+                    if self.careHeur:
+                        
+                        # calculate the straight line distance
+                        hSLD = self.hSLD( parentNode, foundNode )
+
+                        # calc and set heuristic 
+                        foundNode.heur = hSLD + foundNode.totalCost
+
+                # append the node
+                if foundNode.label not in self.visited:
+                    nodes.append( foundNode )
 
             # insert childrenList to successors 
             self.insert_ordered( nodes, successors, alpha=True, localVerbose=True )
@@ -245,3 +289,9 @@ class Frontier():
         # return successors
         return successors
 
+    def hSLD(self, node1, node2):
+
+        # Calculate the heuristic straight line distance (Euclidean distance)
+        x1, y1 = node1.x, node1.y
+        x2, y2 = node2.x, node2.y
+        return float(round( math.sqrt((x1 - x2)**2 + (y1 - y2)**2), 2 ))

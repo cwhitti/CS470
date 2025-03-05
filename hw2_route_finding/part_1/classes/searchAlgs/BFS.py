@@ -1,3 +1,4 @@
+from classes.CONSTANTS import *
 from classes.Frontier import Frontier
 
 '''
@@ -6,7 +7,7 @@ BFS algorithm
 class BFS( Frontier ):
 
     def __init__(self, verbose, nodeGraph) -> None:
-        self.name = "BFS"
+        self.name = BFS_str
         self.verbose = verbose
         self.nodeGraph = nodeGraph
 
@@ -29,6 +30,7 @@ class BFS( Frontier ):
 
         # initialize variables
         path = []
+        depth = "-"
 
         # Loop until we find the goal or run out of nodes to explore
         while len(self.open) > 0:
@@ -52,7 +54,7 @@ class BFS( Frontier ):
                 return path  # Return the path to the goal node
 
             # not reached, get successors
-            successors = self.successors(node)
+            successors = self.successors(node, depth)
             self.insert_end(successors)
 
             # check if this is a prune node
@@ -61,7 +63,7 @@ class BFS( Frontier ):
 
             # display open
             if self.verbose:
-                print("Open list:", [child.label for child in self.open])
+                self.showOpen()
 
         # If no path is found (queue is empty)
         print("Goal not found!")

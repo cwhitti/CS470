@@ -1,4 +1,5 @@
 
+from classes.CONSTANTS import *
 from classes.Frontier import Frontier
 from classes.searchAlgs.BFS import BFS
 from classes.searchAlgs.DFS import DFS
@@ -45,26 +46,6 @@ class Algorithm( Frontier ):
         # return true
         return True
 
-    # def findNode( self, label ):
-        
-    #     # initialize variables
-    #     keys      = list( self.nodeGraph.keys() )
-    #     index     = 0
-    #     foundNode = None
-        
-    #     # loop through parentNode in self.nodeGraph
-    #     while index < len( keys ) and label != keys[index].label:
-
-    #         # increment index
-    #         index += 1
-
-    #     # set key if label != keys[index].label
-    #     if label == keys[index].label:
-    #         foundNode = keys[index]
-
-    #     # return foundNode
-    #     return foundNode
-    
     def initializeGoals( self, start_letter, end_letter, graph):
 
         # set variables
@@ -140,187 +121,11 @@ class Algorithm( Frontier ):
                                                 pathcost=cost,
                                                 x=x,
                                                 y=y
-                                            )
-
-                
+                                            )  
+                   
                 # put childNode in graph
                 self.appendChildToParent( parentNode, childNode )
                 
-    # def inListLabel( self, label, list ):
-    #     labels = [node.label for node in list]
-    #     return label in labels
-    
-    # def insertToList( self, index, node, saveList ):
-        
-    #     # initialize variables 
-    #     inserted = False 
-
-    #     # check not in open already
-    #     if not self.inListLabel( node.label, saveList ):
-
-    #         # insert
-    #         saveList.insert( index, node )
-
-    #         # change bool
-    #         inserted = True
-
-    #     # return inserted
-    #     return inserted
-
-    # def insert_end( self, unorderedList, saveList=None ):
-        
-    #     # define variables
-    #     ignored = []
-
-    #     # verbose
-    #     if self.verbose:
-
-    #         # grab child letters
-    #         children = [n.label for n in unorderedList]
-
-    #         # print verbose
-    #         print(f"Now inserting: {children}\n")
-
-    #     # insert new list at the end of current list
-    #     for newNode in unorderedList:
-
-    #         # assert N is an object
-    #         assert( type(newNode) == SearchNode)
-
-    #         # check for save list
-    #         if saveList != None:
-
-    #             # insert to saved list
-    #             inserted = self.insertToList( len( saveList ), newNode, saveList )
-            
-    #         # otherwise, insert to open
-    #         else:
-    #             inserted = self.insertToList( len( self.open ), newNode, self.open )
-
-    #         # Try inserting and track ignored nodes
-    #         if not inserted:
-
-    #             # track ignored nodes
-    #             ignored.append(newNode)
-
-    #     # return ignored 
-    #     return ignored 
-
-    # def insert_front( self, unorderedList, saveList=None ):
-
-    #     # initialize variables 
-    #     ignored = []
-
-    #     # verbose
-    #     if self.verbose:
-
-    #         # grab child letters
-    #         children = [n.label for n in unorderedList]
-
-    #         # print verbose
-    #         print(f"Now inserting: {children}\n")
-        
-    #     # insert new list at the end of current list
-    #     for newNode in unorderedList:
-
-    #         # assert N is an object
-    #         assert( type(newNode) == SearchNode)
-            
-    #         # check for save list
-    #         if saveList != None:
-
-    #             # insert to saved list
-    #             inserted = self.insertToList( 0, newNode, saveList )
-            
-    #         # otherwise, insert to open
-    #         else:
-    #             inserted = self.insertToList( 0, newNode, self.open )
-
-    #         # Try inserting and track ignored nodes
-    #         if not inserted:
-
-    #             # track ignored nodes
-    #             ignored.append(newNode)
-
-    #     # return ignored 
-    #     return ignored 
-
-    # def insert_ordered(self, unorderedList, saveList=None, alpha=False):
-
-    #     # inititalized variables
-    #     ignored = []
-        
-    #     # verbose
-    #     if self.verbose:
-
-    #         # grab child letters
-    #         children = [n.label for n in unorderedList]
-
-    #         # print verbose
-    #         print(f"Now inserting ordered: {children}\n")
-        
-    #     # loop through unordered list 
-    #     for newNode in unorderedList:
-
-    #         # Reset index for each new node
-    #         index = 0 
-
-    #         # logic for saveList provided 
-    #         if saveList != None:
-
-    #             # Sort by alpha
-    #             if alpha == True:
-
-    #                 # Find the correct insertion index
-    #                 while index < len( saveList ) and saveList[index].label < newNode.label:
-
-    #                     # incremement index
-    #                     index += 1
-
-    #             # sort by cost
-    #             else:
-    #                 # Find the correct insertion index
-    #                 while index < len( saveList ) and saveList[index].pathcost < newNode.pathcost:
-
-    #                     # incremement index
-    #                     index += 1
-
-    #             # Try inserting and track ignored nodes
-    #             if not self.insertToList( index, newNode, saveList ):
-
-    #                 # track ignored nodes
-    #                 ignored.append(newNode)
-
-    #         # logic for self.open list
-    #         else:
-
-    #             # sort by alpha
-    #             if alpha == True:
-
-    #                 # Find the correct insertion index
-    #                 while index < len( self.open ) and self.open[index].label < newNode.label:
-
-    #                     # incremement index
-    #                     index += 1
-
-    #             # sort by cost
-    #             else:
-
-    #                 # Find the correct insertion index
-    #                 while index < len( self.open ) and self.open[index].pathcost < newNode.pathcost:
-
-    #                     # incremement index
-    #                     index += 1
-
-    #             # Try inserting and track ignored nodes
-    #             if not self.insertToList( index, newNode, self.open ):
-
-    #                 # track ignored nodes
-    #                 ignored.append(newNode)
-
-    #     # return ignored
-    #     return ignored
-
     def setAlgorithm( self, alg_str:str ):
         '''
         Sets the _alg obhect given a string
@@ -365,24 +170,18 @@ class Algorithm( Frontier ):
     def _getAlgorithmObj( self, alg_str ):
         '''
         Gets the corresponding algorithm for the algorithm string
-
-        Alg Types:
-            - DFS: "DFS"
-            - BestFS: "BestFS"
-            - BFS: "BFS"
-            - AStar: "AStar"
         '''
 
-        if alg_str == "DEPTH":
+        if alg_str == DFS_str:
             return DFS( self.verbose, self.nodeGraph )
         
-        elif alg_str == "BEST":
+        elif alg_str == BestFS_str:
             return BestFS( self.verbose, self.nodeGraph )
         
-        elif alg_str == "BREADTH":
+        elif alg_str == BFS_str:
             return BFS( self.verbose, self.nodeGraph )
         
-        elif alg_str == "A*":
+        elif alg_str == ASTAR_str:
             return AStar( self.verbose, self.nodeGraph )
         
         return None
