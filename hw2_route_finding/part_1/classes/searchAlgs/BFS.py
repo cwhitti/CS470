@@ -12,35 +12,38 @@ class BFS( Frontier ):
         self.nodeGraph = nodeGraph
 
         # initialize helper class
-        Frontier.__init__( self, nodeGraph )
+        Frontier.__init__( self, nodeGraph, alg_type=self.name )
 
     def start(self, start_node, goal_node):
 
-        # intialize variables
+        # initialize variables
         self.insert_end( [start_node] )
-        prune_nodes = []
 
         # call bfs
-        path = self._BFS_helper( goal_node, prune_nodes )
+        paths = self._BFS_helper( goal_node )
 
         # return the pruned path
-        return self.prune_path( path, prune_nodes )
+        return self.bestPath( paths )
         
-    def _BFS_helper( self, goal_node, prune_nodes ):
+    def _BFS_helper( self, goal_node ):
 
         # initialize variables
         path = []
+        paths = []
         depth = "-"
+        depth = 0
 
         # Loop until we find the goal or run out of nodes to explore
         while len(self.open) > 0:
+
+            depth += 1
 
             # pop top of stack
             node = self.open.pop(0)
 
             # print exploring node 
-            print("~" * 100)
-            print(f"Exploring node: {node.label}")
+            if self.verbose:
+                print(f"Exploring node: {node.label}")
             
             # add to visited
             self.visited.add( node )
@@ -50,8 +53,8 @@ class BFS( Frontier ):
 
             # Check if we reached the goal
             if node.label == goal_node.label:
-                print(f"Success! Found goal node: {goal_node.label}")
-                return path  # Return the path to the goal node
+                # print(f"Success! Found goal node: {goal_node.label}")
+                return paths  # Return the path to the goal node
 
             # not reached, get successors
             successors = self.successors(node, depth)
@@ -59,7 +62,8 @@ class BFS( Frontier ):
 
             # check if this is a prune node
             if self.is_pruneable( successors, goal_node ):
-                prune_nodes.append( node )
+                path.append( goal_node )
+                paths.append( path.copy() )
 
             # display open
             if self.verbose:

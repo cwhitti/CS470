@@ -17,17 +17,18 @@ class DFS( Frontier ):
 
         # initialize variables
         path = []
-        prune_nodes = []
+        paths = []
+        min_path_length = []
 
         # add start node to open
         self.open.append( start_node )
 
-        # get path
-        path = self._DFS_Helper( start_node, goal_node, 0, path, prune_nodes, )
+        # get paths
+        paths = self._DFS_Helper( start_node, goal_node, 0, path, paths )
 
-        return self.prune_path( path, prune_nodes)
-    
-    def _DFS_Helper(self, node, goal_node, depth, path, prune_nodes=[]):
+        # return paths
+        return self.bestPath( paths )
+    def _DFS_Helper(self, node, goal_node, depth, path, paths):
 
         # Pop from open list
         self.open.pop( self.open.index(node) )
@@ -42,14 +43,16 @@ class DFS( Frontier ):
 
         # Visit the node
         self.visited.add( node.label )
-        print("~" * 100)
-        print(f"Exploring node: {node.label}")
+
+        if self.verbose:
+            print(f"Exploring node: {node.label}")
+            
         path.append(node)
 
         # Check if it's the goal node
         if node.label == goal_node.label:
-            print("!!! We found the goal node :D !!!")
-            return path  # Return the path to the goal
+            # print("!!! We found the goal node :D !!!")
+            return paths  # Return the path to the goal
 
         # Expand children and add to open list
         successors = self.successors( node, depth )
@@ -57,7 +60,8 @@ class DFS( Frontier ):
 
         # check if this is a prune node
         if self.is_pruneable( successors, goal_node ):
-            prune_nodes.append( node )
+            path.append(goal_node)
+            paths.append( path.copy() )
 
         # Debug: Print open list
         if self.verbose:
@@ -65,7 +69,7 @@ class DFS( Frontier ):
 
         # Recursively visit next nodes in the open list
         for child in self.open:
-            result = self._DFS_Helper(child, goal_node, depth, path, prune_nodes)
+            result = self._DFS_Helper(child, goal_node, depth, path.copy(), paths)
             if result:
                 return result  # Goal found
         

@@ -1,5 +1,4 @@
 from classes.CONSTANTS import *
-import math 
 
 class SearchNode():
 
@@ -14,8 +13,10 @@ class SearchNode():
 
         # set extras
         self.depth = 0   
-        self.totalCost = 0
-        self.heur = self.pathcost
+        self.hSLD = 0 # Best FS cares about this
+
+        # total cost
+        self.totalCost = self.pathcost
 
         # initialize dynamic variables
         self.children = []
@@ -25,19 +26,10 @@ class SearchNode():
         return True
 
     def constructBasic( self ):
-        return f"{self.label};{self.depth};{self.pathcost:.2f} {self.totalCost:.2f};{self.heur:.2f}"
+        return f"{self.label};{self.depth};{self.pathcost};{self.hSLD:.2f};{self.totalCost:.2f}"
     
     def getChildren(self):
         return sorted(self.children, key=lambda node: node.label)
     
     def showBasic( self ):
         return self.constructBasic( )
-
-    def showChildren( self ):
-
-        print("==========================")
-        print(f"Showing children of {self.label}:")
-        for childNode in self.children:
-            childNode.showBasic()
-            print ( f"\t- Heuristic from Parent: { self.hSLD( childNode ) }" )
-        print("==========================")

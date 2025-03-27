@@ -8,18 +8,26 @@ class Frontier():
         self.open = []
         self.visited = set()
         self.nodeGraph = nodeGraph 
-
         self.careCost = False
-        self.careHeur = False
 
         # see if we care about cost
-        if alg_type in [ BestFS_str, ASTAR_str ]:
-            self.careCost = False
-            if alg_type == ASTAR_str:
-                self.careHeur = False
+        if alg_type in [ASTAR_str]:
+            self.careCost = True
 
+    def bestPath( self, paths ):
+
+        index = 1
+
+
+        if self.verbose:
+            for path in paths:
+
+                print(f"Path #{index}: {[elm.label for elm in path]}")
+
+        return paths[0]
+    
     def showOpen( self ):
-        print("Open List: ", end = None)
+        print("Open list: ", end = "")
 
         print( [elm.showBasic() for elm in self.open] )
 
@@ -53,7 +61,7 @@ class Frontier():
         inserted = False 
 
         # check not in open already
-        if not self.inListLabel( node.label, saveList ):
+        if not self.inListLabel( node.label, saveList ) and node.label not in self.visited:
 
             # insert
             saveList.insert( index, node )
@@ -64,11 +72,10 @@ class Frontier():
         # return inserted
         return inserted
 
-    def insertToListMultiple( self, unorderedList:list, officialList, index = None, localVerbose=False ):
+    def insertToListMultiple( self, unorderedList:list, officialList, index = None, localVerbose=False, alpha=True, reverse=True ):
 
         # initialize variables
         ignored = []
-        priority = []
         added = []
 
         # pluck out ignored
@@ -86,26 +93,20 @@ class Frontier():
                     # if so, pop it
                     officialList.pop( officialList.index( node ) )
 
-                    # add to high priority
-                    priority.append( node )
-
-                else:
-                    # move it to "added"
-                    added.append( node )
+                # append to added
+                added.append( node )
                     
             # ignore it if esle
             else:
                 ignored.append( node )
         
         # sort added list 
-        added = self.orderNodes( added )
-        priority = self.orderNodes( priority )
+        added = self.orderNodes( added, alpha, reverse )
 
         # extend list
         officialList[index:index] = added
 
         # extend high priority
-        officialList[0:0] = priority
 
         # verbose
         if self.verbose and localVerbose:
@@ -119,7 +120,7 @@ class Frontier():
         # return ignored
         return ignored
     
-    def insert_end( self, unorderedList:list, saveList=None ):
+    def insert_end( self, unorderedList:list, saveList=None, alpha=True, reverse=True ):
 
         # throw in save list
         if saveList != None:
@@ -128,23 +129,23 @@ class Frontier():
             insert_index = len( saveList )
 
             # grab ignored
-            ignored = self.insertToListMultiple( unorderedList, saveList, index=insert_index )
+            ignored = self.insertToListMultiple( unorderedList, saveList, index=insert_index, 
+                                                            alpha=alpha, reverse=reverse)
         
         # throw in open list
         else:
-
-            print( unorderedList )
 
             # define variables
             insert_index = len( self.open )
             
             # grab ignored
-            ignored = self.insertToListMultiple( unorderedList, self.open, index=insert_index )
+            ignored = self.insertToListMultiple( unorderedList, self.open, index=insert_index, 
+                                                            alpha=alpha, reverse=reverse )
 
         # return ignored 
         return ignored 
 
-    def insert_front( self, unorderedList:list, saveList=None ):
+    def insert_front( self, unorderedList:list, saveList=None, alpha=True, reverse=True ):
 
         # initialize variables 
         insert_index = 0
@@ -153,96 +154,73 @@ class Frontier():
         if saveList != None:
 
             # grab ignored
-            ignored = self.insertToListMultiple( unorderedList, saveList, index=insert_index )
+            ignored = self.insertToListMultiple( unorderedList, saveList, index=insert_index, 
+                                                                alpha=alpha, reverse=reverse )
         
         # throw in open list
         else:
             
             # grab ignored
-            ignored = self.insertToListMultiple( unorderedList, self.open, index=insert_index )
+            ignored = self.insertToListMultiple( unorderedList, self.open, index=insert_index, 
+                                                                alpha=alpha, reverse=reverse )
 
         # return ignored 
         return ignored 
 
-    def insert_ordered(self, unorderedList:list, saveList=None, alpha=True, localVerbose=False ):
+    def insert_ordered(self, unorderedList:list, saveList=None, alpha=True, localVerbose=False, reverse=True ):
 
         # inititalized variables
         insert_index = 0
 
         # order the list 
-        ordered_list = self.orderNodes( unorderedList, alpha=alpha)
+        ordered_list = self.orderNodes( unorderedList, alpha=alpha, reverse=reverse)
 
         # throw in save list
         if saveList != None:
 
             # grab ignored
-            ignored = self.insertToListMultiple( ordered_list, saveList, index=insert_index, localVerbose=localVerbose )
+            ignored = self.insertToListMultiple( ordered_list, saveList, index=insert_index, localVerbose=localVerbose, 
+                                                                                                alpha=alpha, reverse=reverse )
         
         # throw in open list
         else:
             
             # grab ignored
-            ignored = self.insertToListMultiple( ordered_list, self.open, index=insert_index, localVerbose=localVerbose)
+            ignored = self.insertToListMultiple( ordered_list, self.open, index=insert_index, localVerbose=localVerbose, 
+                                                                                                alpha=alpha, reverse=reverse)
 
         # return ignored
         return ignored
     
     def is_pruneable( self, successors, goal_node):
         return goal_node.label in [child.label for child in successors]
-
-    def prune_path( self, path, prune_nodes ):
-
-        print("\n" + "+" * 100)
-        print("ATTEMPTING TO PRUNE")
-
-        # initialize indexes
-        best_index = 1000000000
-
-        # turn path to letters
-        letter_path = [ node.label for node in path]
-
-        # loop through all valud prune nodes
-        for node in prune_nodes:
-
-            # get the index of the pruned node
-            index = letter_path.index( node.label )
-
-            assert( index < best_index )
-
-            # if its the shortest terminal letter
-            if index < best_index:
-
-                # reassign best index
-                best_index = index
-            
-        print(f"Best letter to prune on: {letter_path[best_index]} - index {best_index}")
         
-        # cut down the path
-        best_path = path[ 0:best_index + 1 ] + [path[-1]]
-        print("+" * 100 + "\n")
-
-        # return best path
-        return best_path
-
-        
-    def orderNodes( self, unorderedList:list, alpha=True ):
+    def orderNodes( self, unorderedList:list, alpha=True, reverse=True ):
 
         # initialize variables 
+
+        # print(f"Alpha: {alpha}, Reversing: {reverse}")
 
         # order by letter for now
         if alpha:
             unorderedList.sort(key=lambda node: node.label)
 
-        # TODO: implement by heuristics
+        # order by heuristics
+        else:
+            unorderedList.sort(key=lambda node: node.totalCost, reverse=reverse)
+
+        # print(f"Ordiering by alpha: {alpha}: {[elm.showBasic() for elm in unorderedList]}")
 
         # return ordered nodes
         return unorderedList
         
-    def successors( self, parentNode:SearchNode, depth=None ) -> list[SearchNode]:
+    def successors( self, parentNode:SearchNode, depth=None, alpha=True, reverse=True ) -> list[SearchNode]:
 
         # initialize variables
         nodes = []
         successors = []
+
+        # print(f"Alpha: {alpha}, Reversing: {reverse}")
 
         # check if letter is in graph
         if parentNode != None and parentNode in self.nodeGraph:
@@ -253,38 +231,23 @@ class Frontier():
             # loop through children list
             for child in childrenList:
 
-                # save cost info 
-                pathcost = child.pathcost
-
                 # find the node
                 foundNode = self.findNode( child.label )
 
-                # change depth of node
-                foundNode.depth = depth 
-                foundNode.pathcost = pathcost
-                foundNode.heur =  foundNode.pathcost
-
-                # See about extras
-                if self.careCost or self.careHeur:
-
-                    # set total cost
-                    foundNode.totalCost = parentNode.totalCost + foundNode.pathcost
+                # copy everything over. sigh.
+                # if not self.careCost:
+                foundNode.pathcost = child.pathcost
+                foundNode.hSLD = child.hSLD
+                # foundNode.totalCost = child.hSLD
+                foundNode.totalCost =  child.totalCost + parentNode.totalCost
+                foundNode.depth = depth
                     
-                    # Do we care about the heuristic?
-                    if self.careHeur:
-                        
-                        # calculate the straight line distance
-                        hSLD = self.hSLD( parentNode, foundNode )
-
-                        # calc and set heuristic 
-                        foundNode.heur = hSLD + foundNode.totalCost
-
                 # append the node
-                if foundNode.label not in self.visited:
+                if foundNode.label not in self.visited and foundNode.label not in [elm.label for elm in self.open]:
                     nodes.append( foundNode )
 
             # insert childrenList to successors 
-            self.insert_ordered( nodes, successors, alpha=True, localVerbose=True )
+            self.insert_ordered( nodes, successors, alpha=alpha, localVerbose=True, reverse=reverse )
 
         # return successors
         return successors

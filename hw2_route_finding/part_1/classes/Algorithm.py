@@ -58,8 +58,6 @@ class Algorithm( Frontier ):
 
         # initialize graph and helper module
         self.initializeNodeGraph( graph )
-
-        # print( len( self.nodeGraph))
         self.updateAlgNodeGraph()
         Frontier.__init__( self, self.nodeGraph )
 
@@ -67,22 +65,60 @@ class Algorithm( Frontier ):
         startNode = self.findNode( self.start_letter )
 
         # insert starting Node
-        self.insert_end( [ startNode ] )
+        self.insert_end( [ startNode ], reverse=False )
 
     def initializeLetterGraph( self, letterGraph ):
         self.letterGraph = letterGraph
         return self.letterGraph != None
         
-    def initializeNode( self, *, label, pathcost, x, y ):
-        return SearchNode( label=label, pathcost=pathcost, x=x, y=y)
+    def initializeNode( self, *, label, pathcost, x, y, basic, endNode = None ):
+
+        # create new node
+        newNode = SearchNode( label=label, 
+                                pathcost=int(pathcost), 
+                                x=x, 
+                                y=y
+                            )
+
+        # if not basic, do extra stuff
+        if endNode != None and not basic:
+
+            # assign HSLD
+            newNode.hSLD = float(self.hSLD( newNode, endNode ))
+
+            # case: Best FS
+            if self._alg.name == BestFS_str:
+
+                # assign hSLD to total cost
+                newNode.totalCost = newNode.hSLD
+
+            # case: A star
+            else:
+
+                # add hSLD to total cost
+                newNode.totalCost = newNode.pathcost + newNode.hSLD
+
+        # return the search node
+        return newNode
     
     def initializeNodeGraph( self, letterGraph ):
 
         #initialize variables
         self.initializeLetterGraph( letterGraph )
+        basic = self._alg.name in [ DFS_str, BFS_str ]
         ignore = [".POS"]
         self.nodeGraph = {}
         rememberNodes = {}
+
+        # get end node
+        endInfo = self.letterGraph[ self.goal_letter]
+        [endx, endy] = endInfo[".POS"]
+        endNode = self.initializeNode(  label=self.goal_letter,
+                                        pathcost=0,
+                                        x=endx,
+                                        y=endy,
+                                        basic=basic
+                                        )
         
         # loop through graph object
         for parentLetter, childrenList in letterGraph.items():
@@ -91,13 +127,14 @@ class Algorithm( Frontier ):
             x, y = childrenList[".POS"]
 
             # create parent node
-            parentNode = self.initializeNode(  
-                                            label=parentLetter,
-                                            pathcost=0,
-                                            x=x,
-                                            y=y
-                                            )
-            
+            parentNode = self.initializeNode( label=parentLetter,
+                                                pathcost=0,
+                                                x=x,
+                                                y=y,
+                                                endNode = endNode,
+                                                basic = basic
+                                                )
+
             # add to remember nodes
             rememberNodes[ parentLetter ] = parentNode 
 
@@ -120,9 +157,11 @@ class Algorithm( Frontier ):
                                                 label=childLetter,
                                                 pathcost=cost,
                                                 x=x,
-                                                y=y
+                                                y=y,
+                                                endNode = endNode,
+                                                basic = basic
                                             )  
-                   
+
                 # put childNode in graph
                 self.appendChildToParent( parentNode, childNode )
                 

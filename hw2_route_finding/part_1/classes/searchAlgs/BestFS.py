@@ -17,15 +17,48 @@ class BestFS( Frontier ):
     def start( self, *, start_node, goal_node ):
 
         # initialize start node 
-        self.insert_front( start_node )
+        path = []
+        depth = 0
+        self.insert_front( [start_node] )
 
+        print()
+
+        # loop  through open list
         while len(self.open) > 0:
 
+            # add one to depth 
+            depth = depth + 1
 
+            # pop node
+            node = self.open.pop(-1)
 
-        
-        return None
+            # add to visited
+            self.visited.add( node )
 
-    def _BestFSHelper(self, graph, start, goal):
+            # print exploring node
+            if self.verbose:
+                print(f"Exploring node: {node.label}")
 
-        pass
+            # check if the goal node
+            if node.label == goal_node.label:
+                # Add the node to the path
+                path.append( node )
+                return path
+            
+            # Add the node to the path
+            path.append( node )
+
+            # sort the current open list
+            self.orderNodes( self.open, alpha=False, reverse=False)
+
+            # grab successors
+            successors = self.successors( node, depth, alpha=True )
+
+            # insert them at the end 
+            self.insert_end( successors, alpha=False, reverse=True )
+
+            # show open
+            self.showOpen()
+
+        # return the path
+        return path
