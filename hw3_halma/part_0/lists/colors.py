@@ -4,7 +4,7 @@ colors = {
                 "#ff2626", # main color
                 "#ffbdbd"  # home color
             ),
-        "black":
+        "gray":
             (
                 "#5f5f5f", # main color
                 "#b2b2b2"  # home color
@@ -14,6 +14,16 @@ colors = {
             (
                 "#36b200", # main color
                 "#c3e9b3"  # home color
+            ),
+        "blue":
+            (
+                "#3e8bc2", # main color
+                "#a1cff0"  # home color
+            ),
+        "pink":
+            (
+                "#fa98cc", # main color
+                "#ffcce7"  # home color
             ),
         
         }
