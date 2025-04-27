@@ -35,7 +35,7 @@ def calculate_score(board, player, opponent):
     
     score += compute_distance_map(board, player, opponent, pieces  )
 
-    return round(score, 2)
+    return round(score, 4)
 
 
 def get_all_pieces(player, board ):
@@ -70,3 +70,23 @@ def get_all_pieces(player, board ):
                     pieces.append( pieceObj )
     # return pieces
     return pieces
+
+
+def visualize_board( board ):
+
+    print()
+
+    for row in range( len( board ) ):
+        for col in range( len( board) ):
+
+            piece = board[row][col]
+
+            if piece != None:
+
+                print( f" {piece.owner.name[0]} ", end="" )
+            
+            else:
+                print( ' X ', end="")
+        print()
+
+    print()

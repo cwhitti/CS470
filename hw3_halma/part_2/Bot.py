@@ -1,12 +1,12 @@
 import time
 from copy import deepcopy
-from scoreHelper import calculate_score
+from scoreHelper import calculate_score, visualize_board
 from standardConstants import *
 import random 
 
 class Bot():
     
-    def __init__(self, *, ABpruning=False, search_depth=3, mode=BOT_MODE) -> None:
+    def __init__(self, *, ABpruning=False, search_depth=2, mode=BOT_MODE) -> None:
         
         # initialize variables
         self.search_depth = search_depth
@@ -23,6 +23,7 @@ class Bot():
         best_score = float("-inf")
         best_piece = None
         best_move = None
+        found_win = False
 
         # get all valid moves for self
         validMoves = self.get_moves_dict(board=board, player=self)
@@ -30,8 +31,11 @@ class Bot():
         # loop through each piece and its moveset
         for piece, moveSet in validMoves.items():
 
+            # loop through all moves
             for move in moveSet:
-                # simulate move
+                
+                # print(f"Following down the {piece.canvasPiece} -> {move} path")
+
                 new_board = self.simulate_move(board=board, piece=piece, move=move)
 
                 # evaluate score with minimax
@@ -43,66 +47,66 @@ class Bot():
                     opponent=opponent,
                     rootPlayer=player,
                     rootOpponent=opponent
-                )
+                )   
+                
+                if self.check_win(board=new_board, player=player, opponent=opponent, displayBoard=False):
 
-                if score == 10:
-                    print( new_board)
-                    print(f"WE WIN! {piece.canvasPiece} -> {best_move}")
-                    time.sleep( 10000 )
                     best_score = score
                     best_piece = piece
                     best_move = move
-                    quit()
-                    return best_piece, best_move
+                    found_win = True
+                    break
+                
+                else:
+                    if score > best_score:
+                        best_score = score
+                        best_piece = piece
+                        best_move = move
+                
+            if found_win:
+                break
 
-                # check if better than current best
-                if score > best_score:
-                    best_score = score
-                    best_piece = piece
-                    best_move = move
-
-        print( best_piece.canvasPiece, best_move)
+        print( best_piece.canvasPiece, best_move, best_score)
         return best_piece, best_move
     
     def minimax(self, board, depth, max_player, player, opponent, rootPlayer, rootOpponent):
-        # base case: depth 0 or win
-        if depth == 0 or self.check_win(board=board, player=player, opponent=opponent):
+
+        if depth == 0 or self.check_win(board=board, player=rootPlayer, opponent=rootOpponent, displayBoard=False):
             return calculate_score(board=board, player=rootPlayer, opponent=rootOpponent)
 
-        # get all valid moves
         validMoves = self.get_moves_dict(board=board, player=player)
 
-        if not validMoves:  # no moves left
+        if not validMoves:
             return calculate_score(board=board, player=rootPlayer, opponent=rootOpponent)
 
-        # MAX player's turn
         if max_player:
             best_score = float("-inf")
             for piece, moveSet in validMoves.items():
                 for move in moveSet:
                     new_board = self.simulate_move(board=board, piece=piece, move=move)
+                    # **Notice the player is opponent now**
                     score = self.minimax(
                         board=new_board,
                         depth=depth - 1,
-                        max_player=False,
-                        player=opponent,
-                        opponent=player,
+                        max_player=False,  # min next
+                        player=opponent,  # <-- now opponent moves
+                        opponent=player,  # <-- player becomes opponent
                         rootPlayer=rootPlayer,
                         rootOpponent=rootOpponent
                     )
                     best_score = max(best_score, score)
             return best_score
-        
-        # MIN player's turn
+
         else:
             best_score = float("inf")
             for piece, moveSet in validMoves.items():
                 for move in moveSet:
                     new_board = self.simulate_move(board=board, piece=piece, move=move)
+                    # **Swap again**
                     score = self.minimax(
                         board=new_board,
                         depth=depth - 1,
-                        max_player=True,
+                        max_player=True,  # max next
                         player=opponent,
                         opponent=player,
                         rootPlayer=rootPlayer,
@@ -118,7 +122,7 @@ class Bot():
         (newRow, newCol) = move
 
         # Deep copy the board
-        new_board = deepcopy(board)
+        new_board = self.copy_board(board)
 
         # get current row/col
         row, col = piece.get_coords( board=new_board )
@@ -131,3 +135,21 @@ class Bot():
 
         # return new board 
         return new_board
+    
+    def copy_board( self, board ):
+
+        newBoard = []
+
+        for row in range( len( board ) ):
+
+            newRow = []
+
+            for col in range( len( board ) ):
+
+                piece = board[row][col]
+
+                newRow.append( piece )
+            
+            newBoard.append( newRow )
+         
+        return newBoard

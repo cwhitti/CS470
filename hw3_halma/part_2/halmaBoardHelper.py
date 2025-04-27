@@ -1,5 +1,6 @@
 from standardConstants import *
 from playersHelper import switch_players
+from scoreHelper import calculate_score, visualize_board
 from scoreHelper import *
 from Piece import Piece
 
@@ -40,16 +41,24 @@ def bold_piece(self, row, col):
         self.canvas.itemconfig(piece_id, width=4, outline='black')  # Thicker border for bold effect
         self.bolded_pieces.append( (row, col) )
 
-def check_win(self, *, player, opponent, board=None) -> bool:
+def check_win(self, *, player, opponent, board=None, displayBoard=False) -> bool:
 
     opHomeSquares = opponent.get_home_squares()
 
     if board==None:
         board = self.board
 
+    if displayBoard:
+        visualize_board( board )
+
     for row, col in opHomeSquares:
+        
         if not self.occupied_by(row, col, player=player, board=board):
             return False  # one of the opponent's home squares is not occupied by self
+
+    if ( displayBoard ):
+
+        print("^^^ GIRL YOU WON THAT SHIT ^^^ ")
 
     return True  # all opponent's home squares are occupied by self
 
