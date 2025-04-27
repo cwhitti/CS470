@@ -154,13 +154,13 @@ class Halma( ):
         self.player2.score = calculate_score( self.board, self.player2, self.player1 )
         self.update_scores()
 
-        if self.check_win(self.current_player, self.opponent) or self.check_win( self.opponent, self.current_player):
+        if self.check_win(player=self.current_player, opponent=self.opponent) or self.check_win( player=self.opponent, opponent=self.current_player):
             self.end_game()
 
     def run_bot_move( self, player ):
 
-        # SLEEP FIRST
-        selectedPiece, bestMove = player.minimax_search( board=self.board, opponent=self.opponent, max_player=player.order%2 )
+        # run minimax
+        selectedPiece, bestMove = player.minimax_search( board=self.board, player=player, opponent=self.opponent)
 
         # grab row, col to move
         (from_pos) = selectedPiece.get_coords( board=self.board )
@@ -181,14 +181,15 @@ class Halma( ):
             # None
 
         # I need to implement a minmax algorithm here, which is probably a method in the Bot class
-        selectedPiece, bestMove = player.minimax_search( board=self.board, opponent=self.opponent, max_player=player.order%2 )
+        selectedPiece, bestMove = player.minimax_search( board=self.board, player=player, opponent=self.opponent )
 
         # grab row, col to move
         # selectedRow, selectedCol = selectedPiece.get_coords( board=self.board )
         (bestRow, bestCol) = bestMove
 
         # print the recommended move
-        print(f"Recommended move: {selectedPiece.canvasPiece} -> ({bestRow}, {bestCol})" )
+        #print(f"Recommended move: {selectedPiece.canvasPiece} -> ({bestRow}, {bestCol})" )
+        self.update_rec_move( selectedPiece, bestMove, player)
 
     def start_turn(self):
 
@@ -202,7 +203,7 @@ class Halma( ):
         if player.mode == BOT_MODE:
 
             # run the bot
-            self.run_bot_move( player=player )
+            self.root.after(100, lambda: self.run_bot_move(player=player))
 
         # otherwise, it's a human!
         else:
@@ -231,12 +232,14 @@ class Halma( ):
         self.place_initial_pieces()
 
     def _add_grid_labels(self):
+        PADDING = 30
+
         # Label columns (top side)
         for col in range(self.board_size):
-            x = col * CELL_SIZE + CELL_SIZE / 2
+            x = PADDING + col * CELL_SIZE + CELL_SIZE / 2
             self.canvas.create_text(
                 x, 
-                -CELL_SIZE / 2,  # Slightly above the top row
+                PADDING / 2,  # a little down from top edge
                 text=str(col), 
                 font=("Arial", 12),
                 anchor='center'
@@ -244,9 +247,9 @@ class Halma( ):
             
         # Label rows (left side)
         for row in range(self.board_size):
-            y = row * CELL_SIZE + CELL_SIZE / 2
+            y = PADDING + row * CELL_SIZE + CELL_SIZE / 2
             self.canvas.create_text(
-                -CELL_SIZE / 2, 
+                PADDING / 2,
                 y,
                 text=str(row), 
                 font=("Arial", 12),
@@ -298,6 +301,20 @@ class Halma( ):
         )
         self.player1_score_label.pack(side='top', anchor='w')
 
+
+        if self.player1.mode == RECOMMENDER_MODE:
+        # Recommended move label (to the right)
+            self.recommended_move_label1 = tk.Label(
+                self.top_player_info,
+                text="",
+                bg=self.player1.homeColor,
+                fg=self.player1.mainColor,
+                font=("Arial", 12),
+                anchor='w'
+            )
+            self.recommended_move_label1.pack(side='left', padx=20)
+        
+        
     def _pack_player_2(self):
         self.bottom_label_frame = tk.Frame(self.main_frame, bg="white")
         self.bottom_label_frame.pack(fill='x')
@@ -324,6 +341,18 @@ class Halma( ):
             anchor='w'
         )
         self.player2_score_label.pack(side='top', anchor='w')
+
+        if self.player2.mode == RECOMMENDER_MODE:
+        # Recommended move label (to the right)
+            self.recommended_move_label2 = tk.Label(
+                self.bottom_player_info,
+                text="",
+                bg=self.player2.homeColor,
+                fg=self.player2.mainColor,
+                font=("Arial", 12),
+                anchor='w'
+            )
+            self.recommended_move_label2.pack(side='left', padx=20)
         
 
     def _pack_board_and_log(self):
@@ -343,9 +372,8 @@ class Halma( ):
             bg="white", 
             highlightthickness=4
         )
-        self._add_grid_labels()
         self.canvas.pack()
-
+        self._add_grid_labels()
 
         # --- Log + Turn Label on the right ---
         self.log_frame = tk.Frame(self.board_and_log_frame, bg="white")

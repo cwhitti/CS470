@@ -21,6 +21,7 @@ if __name__ == '__main__':
         colorName="Red",
         mainColor=colors["red"][0], # main color
         homeColor=colors["red"][1],  # home color
+        # mode=BOT_MODE,
         mode=BOT_MODE,
     )
 
@@ -29,7 +30,8 @@ if __name__ == '__main__':
         colorName="Blue",
         mainColor=colors["blue"][0], # main color
         homeColor=colors["blue"][1],  # home color
-        mode=RECOMMENDER_MODE,
+        # mode=RECOMMENDER_MODE,
+        mode=BOT_MODE,
     )
 
     playerList = [ me, bot ]

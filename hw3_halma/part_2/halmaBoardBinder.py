@@ -28,3 +28,4 @@ Halma.place_initial_pieces = place_initial_pieces
 Halma.set_homes = set_homes
 Halma.set_current_player = set_current_player
 Halma.update_scores = update_scores
+Halma.update_rec_move = update_rec_move

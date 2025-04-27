@@ -1,3 +1,4 @@
+import time
 from copy import deepcopy
 from scoreHelper import calculate_score
 from standardConstants import *
@@ -16,7 +17,9 @@ class Bot():
     def assign_player( self, player ):
         self.player = player
 
-    def minimax_search(self, *, board, opponent, max_player):
+    def minimax_search(self, *, board, player, opponent):
+
+        # initialize variables
         best_score = float("-inf")
         best_piece = None
         best_move = None
@@ -24,104 +27,95 @@ class Bot():
         # get all valid moves for self
         validMoves = self.get_moves_dict(board=board, player=self)
 
-        # loop thru piece and its movesets
+        # loop through each piece and its moveset
         for piece, moveSet in validMoves.items():
 
-            # loop through the moves in the moveset
             for move in moveSet:
-
-                # create a new board with the move
+                # simulate move
                 new_board = self.simulate_move(board=board, piece=piece, move=move)
 
-                # if piece.canvasPiece == 107:
-                #     print( new_board )
-                #     print(f"If {self.name} moved {piece.canvasPiece} to {move}, {self.name} would have {score} points")
+                # evaluate score with minimax
+                score = self.minimax(
+                    board=new_board,
+                    depth=self.search_depth, 
+                    max_player=True,
+                    player=player,
+                    opponent=opponent,
+                    rootPlayer=player,
+                    rootOpponent=opponent
+                )
 
-                # calculate score for that 
-                score = calculate_score( board=new_board, player=self, opponent=opponent)
+                if score == 10:
+                    print( new_board)
+                    print(f"WE WIN! {piece.canvasPiece} -> {best_move}")
+                    time.sleep( 10000 )
+                    best_score = score
+                    best_piece = piece
+                    best_move = move
+                    quit()
+                    return best_piece, best_move
 
-                # check if this score is better than old scores
+                # check if better than current best
                 if score > best_score:
-
-                    # reassign
                     best_score = score
                     best_piece = piece
                     best_move = move
 
-        # return the best move and piece
+        print( best_piece.canvasPiece, best_move)
         return best_piece, best_move
-
-
-    def minimax(self, board, depth, max_player, player, opponent):
-
-        # depth limit or we can win
+    
+    def minimax(self, board, depth, max_player, player, opponent, rootPlayer, rootOpponent):
+        # base case: depth 0 or win
         if depth == 0 or self.check_win(board=board, player=player, opponent=opponent):
-            return calculate_score(board=board, player=player, opponent=opponent)
+            return calculate_score(board=board, player=rootPlayer, opponent=rootOpponent)
 
-        # get the valid moves with this board
-        validMoves = self.get_moves_dict( board=board, player=player)
+        # get all valid moves
+        validMoves = self.get_moves_dict(board=board, player=player)
 
-        # No moves left, calculate score
-        if not validMoves: 
-            return calculate_score(board=board, player=player, opponent=opponent)
-        
-        # Check if we are max player or not
+        if not validMoves:  # no moves left
+            return calculate_score(board=board, player=rootPlayer, opponent=rootOpponent)
+
+        # MAX player's turn
         if max_player:
-
-            # worst move
-            max_eval = float("-inf")
-
-            # loop through the moves + moveset
+            best_score = float("-inf")
             for piece, moveSet in validMoves.items():
-
-                # loop through the moveset
                 for move in moveSet:
-
-                    # gen new board
                     new_board = self.simulate_move(board=board, piece=piece, move=move)
-
-                    # evaluate down this moveset
-                    eval = self.minimax(board=new_board, 
-                                        depth=depth - 1, 
-                                        max_player=max_player, 
-                                        opponent=opponent, 
-                                        player=player)
-                
-                    # reassign max eval 
-                    max_eval = max(max_eval, eval)
-
-            # return the max eval
-            return max_eval
+                    score = self.minimax(
+                        board=new_board,
+                        depth=depth - 1,
+                        max_player=False,
+                        player=opponent,
+                        opponent=player,
+                        rootPlayer=rootPlayer,
+                        rootOpponent=rootOpponent
+                    )
+                    best_score = max(best_score, score)
+            return best_score
         
-        # is minimum player
+        # MIN player's turn
         else:
-
-            # best move
-            min_eval = float("inf")
-
-            # loop through the moves + moveset
+            best_score = float("inf")
             for piece, moveSet in validMoves.items():
-
-                # loop through the moveset
                 for move in moveSet:
-
-                    # gen new board
                     new_board = self.simulate_move(board=board, piece=piece, move=move)
+                    score = self.minimax(
+                        board=new_board,
+                        depth=depth - 1,
+                        max_player=True,
+                        player=opponent,
+                        opponent=player,
+                        rootPlayer=rootPlayer,
+                        rootOpponent=rootOpponent
+                    )
+                    best_score = min(best_score, score)
+            return best_score
 
-                    # evalue down this moveset
-                    eval = self.minimax(board=new_board, 
-                                        depth=depth - 1, 
-                                        max_player=max_player, 
-                                        opponent=opponent, 
-                                        player=player)
-
-                    # reassign min eval 
-                    min_eval = min(min_eval, eval)
-            
-            # return min value
-            return min_eval
 
     def simulate_move(self, *, board, piece, move):
+
+        # initialize variables
+        (newRow, newCol) = move
 
         # Deep copy the board
         new_board = deepcopy(board)
@@ -129,16 +123,11 @@ class Bot():
         # get current row/col
         row, col = piece.get_coords( board=new_board )
 
-        # get new row/col 
-        (newRow, newCol) = move
-
         # erase current row/col
         new_board[row][col]=None
 
         # assign new row/col
         new_board[newRow][newCol] = piece 
-
-
 
         # return new board 
         return new_board

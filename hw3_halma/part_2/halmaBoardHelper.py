@@ -40,7 +40,7 @@ def bold_piece(self, row, col):
         self.canvas.itemconfig(piece_id, width=4, outline='black')  # Thicker border for bold effect
         self.bolded_pieces.append( (row, col) )
 
-def check_win(self, player, opponent, board=None) -> bool:
+def check_win(self, *, player, opponent, board=None) -> bool:
 
     opHomeSquares = opponent.get_home_squares()
 
@@ -177,7 +177,7 @@ def end_turn( self ):
     print(f"Ending {self.current_player.name}'s turn.")
 
     # check for a valid win
-    if self.check_win( self.current_player, self.opponent ):
+    if self.check_win( player=self.current_player, opponent=self.opponent ):
 
         # end game
         self.end_game( winner = self.current_player )
@@ -450,8 +450,8 @@ def move_piece(self, from_pos, to_row, to_col):
                         x + PIECE_RADIUS, y + PIECE_RADIUS)
     
     self.canvas.coords(piece.canvasText, x, y)
-    self.canvas.tag_raise("piece_text")
-
+    self.canvas.tag_raise(piece.canvasPiece)
+    self.canvas.tag_raise(piece.canvasText)
     
     self._log_move( f"{self.current_player.name}: [{piece.canvasPiece}] ({from_row}, {from_col})-> ({to_row}, {to_col})" )
     
@@ -578,3 +578,10 @@ def set_homes( self ):
 def update_scores(self):
     self.player1_score_label.config(text=f"Score: {self.player1.score}")
     self.player2_score_label.config(text=f"Score: {self.player2.score}")
+
+def update_rec_move( self, selectedPiece, newCoords, player ):
+
+    if player == self.player1:
+        self.recommended_move_label1.config(text=f"Recommended Move: {selectedPiece.canvasPiece} -> {newCoords}")
+    else:
+        self.recommended_move_label2.config(text=f"Recommended Move: {selectedPiece.canvasPiece} -> {newCoords}")
