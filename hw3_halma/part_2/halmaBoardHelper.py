@@ -52,13 +52,13 @@ def check_win(self, *, player, opponent, board=None, displayBoard=False) -> bool
         visualize_board( board )
 
     for row, col in opHomeSquares:
-        
+
         if not self.occupied_by(row, col, player=player, board=board):
             return False  # one of the opponent's home squares is not occupied by self
 
     if ( displayBoard ):
 
-        print("^^^ GIRL YOU WON THAT SHIT ^^^ ")
+        print("^^^ GIRL YOU WON THAT!!! ^^^ ")
 
     return True  # all opponent's home squares are occupied by self
 

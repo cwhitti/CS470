@@ -33,6 +33,7 @@ class Halma( ):
         self.pieces = {}
         self.highlighted_squares = []
         self.bolded_pieces = []
+        self.turn = 0
 
         # initialize the board
         self.initialize_board( filename )
@@ -55,9 +56,6 @@ class Halma( ):
 
         # Sanity check
         assert self.board is not None
-
-        # Set up board
-        self.display_players()
 
         # set up extra cogs
         self.root.after(0, self.on_start)
@@ -160,7 +158,7 @@ class Halma( ):
     def run_bot_move( self, player ):
 
         # run minimax
-        selectedPiece, bestMove = player.minimax_search( board=self.board, player=player, opponent=self.opponent)
+        selectedPiece, bestMove = player.minimax_search( board=self.board, player=player, opponent=self.opponent, turn=self.turn)
 
         # grab row, col to move
         (from_pos) = selectedPiece.get_coords( board=self.board )
@@ -181,7 +179,7 @@ class Halma( ):
             # None
 
         # I need to implement a minmax algorithm here, which is probably a method in the Bot class
-        selectedPiece, bestMove = player.minimax_search( board=self.board, player=player, opponent=self.opponent )
+        selectedPiece, bestMove = player.minimax_search( board=self.board, player=player, opponent=self.opponent, turn=self.turn )
 
         # grab row, col to move
         # selectedRow, selectedCol = selectedPiece.get_coords( board=self.board )
@@ -194,6 +192,7 @@ class Halma( ):
     def start_turn(self):
 
         # grab the player
+        self.turn += 1
         player = self.current_player
 
         # debug
